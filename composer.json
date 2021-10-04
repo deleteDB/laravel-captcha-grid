@@ -1,0 +1,28 @@
+{
+    "name": "deletedb/laravel-captcha-grid",
+    "description": "Laravel quickly creates a verification code tool similar to Google verification code",
+    "keywords": [
+        "laravel",
+        "captcha",
+        "laravel captcha",
+        "google captcha"
+    ],
+    "homepage": "https://github.com/deleteDB/laravel-captcha-grid",
+    "require": {
+        "php": ">=7.0",
+        "ext-gd": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Deletedb\\LaravelCaptchaGrid\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "deleteDB",
+            "email": "1967522059@qq.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
