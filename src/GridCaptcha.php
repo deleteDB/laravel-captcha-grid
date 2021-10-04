@@ -1,13 +1,12 @@
 <?php
 
 
-namespace App\Support\Traits;
+namespace Deletedb\captchaGrid;
 
 
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Psr\SimpleCache\InvalidArgumentException;
 use Illuminate\Support\Str;
 
