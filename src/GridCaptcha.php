@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Deletedb\captchaGrid;
+namespace Deletedb\Laravel;
 
 
 use Exception;
