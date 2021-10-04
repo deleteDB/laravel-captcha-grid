@@ -98,6 +98,9 @@ class GridCaptcha
     protected $imageFile = [];
 
 
+    /**
+     * GridCaptcha constructor.
+     */
     public function __construct()
     {
         //初始化配置
@@ -116,12 +119,21 @@ class GridCaptcha
     }
 
     /**
-     * 获取验证码
+     * 创建验证码
      * @param array $captchaData
      * @return array
-     * @throws InvalidArgumentException
      */
     public function get(array $captchaData = [])
+    {
+        return $this->make($captchaData);
+    }
+
+    /**
+     * 创建验证码初始化
+     * @param array $captchaData
+     * @return array
+     */
+    protected function make(array $captchaData = [])
     {
         $this->captchaData = $captchaData;
         $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
@@ -139,31 +151,43 @@ class GridCaptcha
 
     /**
      * 效验验证码是否正确
-     * @param Request $request
-     * @param bool $checkAndDelete 效验之后是否删除
-     * @return false|array
+     * @param string $captchaKey
+     * @param string $captchaCode
+     * @param bool $checkAndDelete
+     * @return false|mixed
      */
-    public function check(Request $request, bool $checkAndDelete = true)
+    public function check(string $captchaKey, string $captchaCode, bool $checkAndDelete = true)
     {
-        $input = $request->validate([
-            $this->captchaKeyString => "required|string|size:$this->captchaKeyLength",
-            $this->captchaKeyCodeString => 'required|integer|digits_between:1,4',
-        ]);
         //判断是否获取到
         $captcha_data = $checkAndDelete
-            ? Cache::pull("$this->captchaCacheKey:data:" . $input[$this->captchaKeyString], false)
-            : Cache::get("$this->captchaCacheKey:data:" . $input[$this->captchaKeyString], false);
+            ? Cache::pull("$this->captchaCacheKey:data:" . $captchaKey, false)
+            : Cache::get("$this->captchaCacheKey:data:" . $captchaKey, false);
         if ($captcha_data === false) {
             return false;
         }
         //判断验证码是正确
         if (!empty(array_diff(
             str_split($captcha_data['captcha_code']),
-            str_split($input[$this->captchaKeyCodeString])
+            str_split($captchaCode)
         ))) {
             return false;
         }
         return $captcha_data['captcha_data'];
+    }
+
+    /**
+     * 效验验证码是否正确 直接传递 Request 对象方式效验
+     * @param Request $request
+     * @param bool $checkAndDelete 效验之后是否删除
+     * @return false|array
+     */
+    public function checkRequest(Request $request, bool $checkAndDelete = true)
+    {
+        $input = $request->validate([
+            $this->captchaKeyString => "required|string|size:$this->captchaKeyLength",
+            $this->captchaKeyCodeString => 'required|integer|digits_between:1,4',
+        ]);
+        return $this->check($input[$this->captchaKeyString], $input[$this->captchaKeyCodeString], $checkAndDelete);
     }
 
     /**
@@ -217,7 +241,6 @@ class GridCaptcha
         ];
     }
 
-
     /**
      * 组合验证码图片
      * @param array $imgPath
@@ -260,7 +283,6 @@ class GridCaptcha
         imagedestroy($background);
         return "data:image/jpeg;base64," . base64_encode(ob_get_clean());
     }
-
 
     /**
      * 获取验证码图片

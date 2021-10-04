@@ -22,7 +22,8 @@ laravel 快速创建一个类似于 Google 点图验证码的本地验证码工�
 - 发布配置文件
 
 ```shell
-php artisan vendor:publish
+php artisan vendor:publish --provider="Deletedb\Laravel\Providers\LaravelServiceProvider"
+
 ```
 
 ```
@@ -83,7 +84,7 @@ class TestController
 ```
 
 - 生成结果
-```json
+```json5
 {
   "hint": "猴子",//提示文本
   "captcha_key": "Qh8kHYF4C....",//缓存key
@@ -106,18 +107,42 @@ class TestController
 
 class TestController
 {
-    public function index(Request $request)
+    /**
+     * Request 的方式进行效验
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    public function requestCheck(Request $request)
     {
         //注意: $request 里面需要传递 配置文件中的 code_string 以及 key_string 看上方 http 请求示例
         $captcha = new GridCaptcha();
         //注意一定要使用 === 还需要判断返回的数据类型
-        if ($captcha_data = $captcha->check($request) === false) {
+        if ($captcha_data = $captcha->checkRequest($request) === false) {
             return response()->json([
                 'message' => '验证码错误',
                 'code' => 401,
             ]);
         }
         //此处您可以进行业务逻辑处理返回只是方便查看，比如可以获取到上方设置在验证码中的数据 如：上方设置的是手机号 ， 您这里可以获取验证码中的手机号，当效验成功发送短信验证码等...
+        return $captcha_data;
+    }
+
+
+    /**
+     * 传值 的方式进行效验
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    public function check(Request $request)
+    {
+        $captcha = new GridCaptcha();
+        //注意一定要使用 === 还需要判断返回的数据类型
+        if ($captcha_data = $captcha->check('Qh8kHYF4C...', '1574') === false) {
+            return response()->json([
+                'message' => '验证码错误',
+                'code' => 401,
+            ]);
+        }
         return $captcha_data;
     }
 }
