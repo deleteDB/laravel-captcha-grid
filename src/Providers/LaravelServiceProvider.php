@@ -1,6 +1,6 @@
 <?php
 
-namespace Deletedb\captchaGrid\Providers;
+namespace Deletedb\Laravel\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -11,11 +11,11 @@ class LaravelServiceProvider extends ServiceProvider
     {
         $this->publishes([
             //发布配置文件
-            __DIR__ . '/config' => config_path(),
+            dirname(__DIR__) . '/config' => config_path(),
             //发布语言包
-            __DIR__ . '/resources' => resource_path(),
+            dirname(__DIR__) . '/resources' => resource_path(),
             //发布资源文件
-            __DIR__ . '/storage' => storage_path(),
+            dirname(__DIR__) . '/storage' => storage_path(),
         ]);
     }
 }

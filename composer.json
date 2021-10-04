@@ -15,7 +15,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Deletedb\\LaravelCaptchaGrid\\": "src/"
+            "Deletedb\\Laravel\\": "src/"
         }
     },
     "authors": [
@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Deletedb\\captchaGrid\\Providers\\LaravelServiceProvider"
+                "Deletedb\\Laravel\\Providers\\LaravelServiceProvider"
             ]
         }
     }
