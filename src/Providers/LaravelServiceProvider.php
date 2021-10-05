@@ -2,10 +2,20 @@
 
 namespace Deletedb\Laravel\Providers;
 
+use Deletedb\Laravel\GridCaptcha;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelServiceProvider extends ServiceProvider
 {
+
+    /**
+     * Register any application services.
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->singleton('GridCaptcha', GridCaptcha::class);
+    }
 
     public function boot()
     {
