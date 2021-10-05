@@ -1,6 +1,7 @@
 <?php
 
-use Deletedb\Laravel\Facades\GridCaptcha;
+use Deletedb\Laravel\Facades\GridCaptcha as GridCaptchaFacades;
+use Deletedb\Laravel\GridCaptcha as GridCaptcha;
 
 if (!function_exists('grid_captcha')) {
 
@@ -12,8 +13,8 @@ if (!function_exists('grid_captcha')) {
     function grid_captcha(array $captchaData = null)
     {
         if ($captchaData !== null) {
-            return GridCaptcha::get($captchaData);
+            return GridCaptchaFacades::get($captchaData);
         }
-        return GridCaptcha::class;
+        return new GridCaptcha;
     }
 }
