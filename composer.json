@@ -16,7 +16,10 @@
     "autoload": {
         "psr-4": {
             "Deletedb\\Laravel\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "authors": [
         {
@@ -29,7 +32,8 @@
         "laravel": {
             "providers": [
                 "Deletedb\\Laravel\\Providers\\LaravelServiceProvider"
-            ]
+            ],
+            "aliases": "Deletedb\\Laravel\\Facades\\GridCaptcha"
         }
     }
 }

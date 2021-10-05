@@ -23,7 +23,7 @@ class GridCaptcha
      * 验证码缓存key
      * @var string
      */
-    protected $captchaCacheKey = 'grid_captcha';
+    protected $cacheKey = 'grid_captcha';
 
     /**
      * 验证码效验从请求中获取的 Key
@@ -112,7 +112,7 @@ class GridCaptcha
         $this->captchaImageHigh = $config['image']['high'];
 
         $this->captchaValidity = $config['captcha']['validity'];
-        $this->captchaCacheKey = $config['captcha']['cache_key'];
+        $this->cacheKey = $config['captcha']['cache_key'];
         $this->captchaKeyLength = $config['captcha']['key_length'];
         $this->captchaKeyString = $config['captcha']['key_string'];
         $this->captchaKeyCodeString = $config['captcha']['code_string'];
@@ -138,10 +138,10 @@ class GridCaptcha
         $this->captchaData = $captchaData;
         $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
         $this->captchaKey = Str::random($this->captchaKeyLength);
-        $this->imageFile = Cache::remember("$this->captchaCacheKey:path", 604800, function () {
+        $this->imageFile = Cache::remember("$this->cacheKey:path", 604800, function () {
             return $this->getImageFile();
         });
-        Cache::set("$this->captchaCacheKey:data:$this->captchaKey", [
+        Cache::set("$this->cacheKey:data:$this->captchaKey", [
             'captcha_key' => $this->captchaKey,
             'captcha_code' => $this->captchaCode,
             'captcha_data' => $captchaData,
@@ -154,14 +154,14 @@ class GridCaptcha
      * @param string $captchaKey
      * @param string $captchaCode
      * @param bool $checkAndDelete
-     * @return false|mixed
+     * @return false|array
      */
     public function check(string $captchaKey, string $captchaCode, bool $checkAndDelete = true)
     {
         //判断是否获取到
         $captcha_data = $checkAndDelete
-            ? Cache::pull("$this->captchaCacheKey:data:" . $captchaKey, false)
-            : Cache::get("$this->captchaCacheKey:data:" . $captchaKey, false);
+            ? Cache::pull("$this->cacheKey:data:" . $captchaKey, false)
+            : Cache::get("$this->cacheKey:data:" . $captchaKey, false);
         if ($captcha_data === false) {
             return false;
         }
@@ -267,7 +267,7 @@ class GridCaptcha
                 $start_y = $start_y + $pic_h + $space_y;
             }
             //缓存中读取文件
-            $gd_resource = imagecreatefromstring(Cache::remember("$this->captchaCacheKey:file:$path",
+            $gd_resource = imagecreatefromstring(Cache::remember("$this->cacheKey:file:$path",
                 604800,
                 function () use ($path) {
                     return file_get_contents($path);
