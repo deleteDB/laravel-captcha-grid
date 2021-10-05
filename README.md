@@ -5,7 +5,11 @@ laravel 快速创建一个类似于 Google 点图验证码的本地验证码工�
 
 ## 介绍
 
-`laravel-gridCaptcha` 生成类似于谷歌点图验证码的小工具，因为现在PHP大部分生成的验证码，对于恶意者来说很容易识别，而这套小工具很简单但是对于机器人来说需要进行机器学习，恶意者攻击的成本也就增加了，但是这套小工具不同于谷歌验证码需要机器学习，只需要在本地配置好相应的文件即可。因为生成的验证码图片都是读取文件进行生成，所以建议使用Redis进行缓存，代码默认缓存有目录以及目录下的图片 ps:因为是第一次开源，有很多代码写的不是很好，欢迎大佬提出修改意见。
+`laravel-gridCaptcha` 生成类似于谷歌点图验证码的小工具，因为现在PHP大部分生成的验证码，对于恶意者来说很容易识别，而这套小工具很简单但是对于机器人来说需要进行机器学习，恶意者攻击的成本也就增加了，但是这套小工具不同于谷歌验证码需要机器学习，只需要在本地配置好相应的文件即可。因为生成的验证码图片都是读取文件进行生成，所以建议使用Redis进行缓存，代码默认缓存有目录以及目录下的图片 
+
+```
+ps: 如有不足之处，欢迎大佬提出修改意见。
+```
 
 ## 预览
 ![Preview](https://lingshulian.com/s/t/b74e9cf548e1e03c)
@@ -69,18 +73,47 @@ return [
 ```php
 <?php
 
-class TestController
+
+namespace App\Http\Controllers;
+
+
+class TestController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * 辅助函数生成验证码
+     * @return array
+     */
+    public function helpers()
     {
-        $captcha = new GridCaptcha();
-        //可以设置存储在验证码中的信息 如果验证码成功这段信息将返回
-        $captcha_data = [
-           'mobile' => '100xxxxx121'
-        ];
-        return $captcha->get($captcha_data);
+        return grid_captcha([
+            'mobile' => '100xxxxx121'
+        ]);
+    }
+
+    /**
+     * 门面方式生成验证码
+     * @return array
+     */
+    public function facade()
+    {
+        return \Deletedb\Laravel\Facades\GridCaptcha::get([
+            'mobile' => '100xxxxx121'
+        ]);
+    }
+
+    /**
+     * 对象方式生成验证码
+     * @return array
+     */
+    public function object()
+    {
+        $captcha = new \Deletedb\Laravel\GridCaptcha();
+        return $captcha->get([
+            'mobile' => '100xxxxx121'
+        ]);
     }
 }
+
 ```
 
 - 生成结果
@@ -94,62 +127,124 @@ class TestController
 
 - 效验验证码
 
+```html
+ <!--
+     
+生成的是一个九宫格图片，前端需要渲染图片，并且生成九个div用于记录用户点击的宫格位置，宫格位置从 0 开始，当点击到四位的时候返回给后端进行效验 ，因为前端技术拙劣我就不放例子了欢迎大佬补充。
+
+大概思路:
+-->
+<div>
+    <!-- img 显示的是返回的验证码图片-->
+    <img src="data:image/jpeg;base64...." width="300" height="300" alt="" style="display: block;">
+    <div id="0"></div>
+    <div id="1"></div>
+    <div id="2"></div>
+    <div id="3"></div>
+    <div id="4"></div>
+    <div id="5"></div>
+    <div id="6"></div>
+    <div id="7"></div>
+    <div id="8"></div>
+</div>
+```
+- 效果:
+![Preview](https://lingshulian.com/s/t/b1fbc5173f8dfd6e)
+
 ```php
 <?php
 
-// http请求示例:
-// POST http://xxx.com/api/auth/captcha -> 自己定义路由
-// Body: -> 请求体
-// {
-//     "captcha_key":"Qh8kHYF4C...."//验证码key
-//     "captcha_code":"0543"//用户输入的验证码
-// }
+<?php
 
-class TestController
+
+namespace App\Http\Controllers;
+
+
+use Illuminate\Http\Request;
+
+class TestController extends Controller
 {
+
     /**
-     * Request 的方式进行效验
+     * 辅助函数方式效验
      * @param Request $request
-     * @return bool|\Illuminate\Http\JsonResponse
+     * @return array|false|\Illuminate\Http\JsonResponse
      */
-    public function requestCheck(Request $request)
+    public function helpersCheck(Request $request)
     {
-        //注意: $request 里面需要传递 配置文件中的 code_string 以及 key_string 看上方 http 请求示例
-        $captcha = new GridCaptcha();
-        //注意一定要使用 === 还需要判断返回的数据类型
-        if ($captcha_data = $captcha->checkRequest($request) === false) {
-            return response()->json([
-                'message' => '验证码错误',
-                'code' => 401,
-            ]);
+        /**
+         * 传参效验
+         */
+        if ($captcha_data = grid_captcha()->check('Qh8kHYF4C....', '1540') === false) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
         }
-        //此处您可以进行业务逻辑处理返回只是方便查看，比如可以获取到上方设置在验证码中的数据 如：上方设置的是手机号 ， 您这里可以获取验证码中的手机号，当效验成功发送短信验证码等...
+
+        /**
+         * 传递 Request 对象效验
+         */
+        if ($captcha_data = grid_captcha()->checkRequest($request)) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
+        }
+
         return $captcha_data;
     }
-
-
+    
     /**
-     * 传值 的方式进行效验
+     * 门面方式效验
      * @param Request $request
-     * @return bool|\Illuminate\Http\JsonResponse
+     * @return array|false|\Illuminate\Http\JsonResponse
      */
-    public function check(Request $request)
+    public function facadeCheck(Request $request)
     {
-        $captcha = new GridCaptcha();
-        //注意一定要使用 === 还需要判断返回的数据类型
-        if ($captcha_data = $captcha->check('Qh8kHYF4C...', '1574') === false) {
-            return response()->json([
-                'message' => '验证码错误',
-                'code' => 401,
-            ]);
+        /**
+         * 传参效验
+         */
+        if ($captcha_data = \Deletedb\Laravel\Facades\GridCaptcha::check('Qh8kHYF4C....', '1540') === false) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
         }
+
+        /**
+         * 传递 Request 对象效验
+         */
+        if ($captcha_data = \Deletedb\Laravel\Facades\GridCaptcha::checkRequest($request)) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
+        }
+
+        return $captcha_data;
+    }
+    
+    /**
+     * 对象方式效验
+     * @param Request $request
+     * @return array|false|\Illuminate\Http\JsonResponse
+     */
+    public function objectCheck(Request $request)
+    {
+        $captcha = new \Deletedb\Laravel\GridCaptcha();
+        /**
+         * 传参效验
+         */
+        if ($captcha_data = $captcha->check('Qh8kHYF4C....', '1540') === false) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
+        }
+
+        /**
+         * 传递 Request 对象效验
+         */
+        if ($captcha_data = $captcha->checkRequest($request)) {
+            return response()->json(['message' => '验证码错误', 'code' => 401]);
+        }
+
         return $captcha_data;
     }
 }
 
+    //效验完成正确后 您可以进行业务逻辑处理，比如可以获取到上方设置在验证码中的数据 如：上方设置的是手机号，您这里可以获取验证码中的手机号，当效验成功发送短信验证码等...
+
 ```
 
-- 效验成功返回结果
+- 效验成功返回: 返回的是您在生成验证时传递的数据，默认返回空数组
+- 效验失败返回: false
 ```json
 {
   "mobile" : "100xxxxx121"
@@ -160,7 +255,7 @@ class TestController
 - 本地化提示
 
  ```
-resources/lang/grid-captcha.php
+resources/lang/zh_CN/grid-captcha.php
 ```
 ```php
 <?php

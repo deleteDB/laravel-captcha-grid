@@ -2,10 +2,16 @@
     "name": "deletedb/laravel-captcha-grid",
     "description": "Laravel quickly creates a verification code tool similar to Google verification code",
     "keywords": [
-        "laravel",
+        "google-captcha",
+        "google captcha",
+        "recaptcha",
         "captcha",
-        "laravel captcha",
-        "google captcha"
+        "Captcha",
+        "Security",
+        "laravel",
+        "laravel 8",
+        "laravel 8 captcha",
+        "laravel Captcha"
     ],
     "homepage": "https://github.com/deleteDB/laravel-captcha-grid",
     "require": {
