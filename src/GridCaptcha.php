@@ -292,10 +292,10 @@ class GridCaptcha
     protected function getImageFile()
     {
         //获取验证码目录下面的图片
-        $image_path = glob($this->captchaImagePath . '\*');
+        $image_path = glob($this->captchaImagePath . '/*');
         $image_file = [];
         foreach ($image_path as $file) {
-            $image_file[pathinfo($file)['basename'] ?? 'null'] = glob("$file\*.$this->imageSuffix");
+            $image_file[pathinfo($file)['basename'] ?? 'null'] = glob("$file/*.$this->imageSuffix");
         }
         unset($image_file['null']);
         if (empty($image_file)) {
